@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="yw-utils-general">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/yw-utils-general.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

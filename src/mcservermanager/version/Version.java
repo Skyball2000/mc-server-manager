@@ -1,11 +1,14 @@
 package mcservermanager.version;
 
+import mcservermanager.util.Constants;
 import mcservermanager.util.URLGet;
 import org.json.JSONObject;
+import yanwittmann.file.File;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 
 public class Version {
 
@@ -21,8 +24,42 @@ public class Version {
         type = Type.from(versionJson.getString("type"));
     }
 
-    public void getMetaData() throws IOException {
-        URLGet.getFromUrl(metaUrl, false);
+    private URL serverJar, clientJar;
+
+    public boolean getMetaData() throws IOException {
+        ArrayList<String> metaData = URLGet.getFromUrl(metaUrl, false);
+        if (metaData == null) return false;
+        JSONObject jsonRoot = new JSONObject(String.join("", metaData));
+        if (jsonRoot.has("downloads")) {
+            serverJar = new URL(jsonRoot.getJSONObject("downloads").getJSONObject("server").getString("url"));
+            clientJar = new URL(jsonRoot.getJSONObject("downloads").getJSONObject("client").getString("url"));
+            return true;
+        }
+        return false;
+    }
+
+    public File getServer() throws IOException {
+        File downloadFile = new File(Constants.DATA_DIRECTORY + Constants.SERVER_DIRECTORY + id + ".jar");
+        if (!downloadFile.exists()) {
+            downloadFile.getParentFile().mkdirs();
+            if (serverJar == null)
+                if (getMetaData()) {
+                    downloadFile.download(serverJar);
+                } else return null;
+        }
+        return downloadFile;
+    }
+
+    public File getClient() throws IOException {
+        File downloadFile = new File(Constants.DATA_DIRECTORY + Constants.CLIENT_DIRECTORY + id + ".jar");
+        if (!downloadFile.exists()) {
+            downloadFile.getParentFile().mkdirs();
+            if (clientJar == null)
+                if (getMetaData()) {
+                    downloadFile.download(clientJar);
+                } else return null;
+        }
+        return downloadFile;
     }
 
     @Override

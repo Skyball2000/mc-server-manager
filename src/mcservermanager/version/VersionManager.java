@@ -39,6 +39,10 @@ public class VersionManager {
         return versions.stream().filter(version -> version.id.equals(identifier)).findFirst().orElse(null);
     }
 
+    public ArrayList<Version> getVersions() {
+        return versions;
+    }
+
     public void printAllVersions() {
         versions.forEach(Log::info);
     }

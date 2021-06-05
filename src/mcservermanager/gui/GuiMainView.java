@@ -3,6 +3,7 @@ package mcservermanager.gui;
 import mcservermanager.server.Server;
 import mcservermanager.server.ServerManager;
 import mcservermanager.util.Constants;
+import yanwittmann.log.Log;
 import yanwittmann.utils.GeneralUtils;
 import yanwittmann.utils.Popup;
 
@@ -17,7 +18,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 
 public class GuiMainView {
     private ServerManager serverManager;
@@ -26,26 +26,26 @@ public class GuiMainView {
     private JScrollPane serverList;
     private JPanel serverListPanel;
     private JButton createNewServerButton;
+    private JButton reloadButton;
 
     public GuiMainView(ServerManager serverManager) {
         this.serverManager = serverManager;
-        createNewServerButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                createNewServer();
-            }
-        });
+        createNewServerButton.addActionListener(e -> createNewServer());
+        reloadButton.addActionListener(e -> updateView());
     }
 
     public void updateView() {
         for (Component component : serverListPanel.getComponents()) serverListPanel.remove(component);
-        ArrayList<Server> servers = serverManager.getServers();
-        if (servers == null) {
+        java.util.List<Server> servers = serverManager.getServers();
+        if (servers == null || servers.size() == 0) {
             serverListPanel.setLayout(new GridLayout(1, 1));
             JLabel label = new JLabel();
-            label.setText("<html><b>Something went wrong while reading the server data!</b></html>");
+            label.setText("<html><b>There are no servers! Create one using the button below.</b></html>");
             label.setHorizontalAlignment(SwingConstants.CENTER);
             serverListPanel.add(label);
+            serverListPanel.revalidate();
+            mainPanel.revalidate();
+            mainPanel.repaint();
             return;
         }
 
@@ -66,12 +66,6 @@ public class GuiMainView {
                 serverIconLabel.setIcon(GeneralUtils.getScaledImage(server.getIcon(), 64, 64));
                 panel.add(serverIconLabel);
             }
-
-            JLabel serverVersionLabel = new JLabel();
-            serverVersionLabel.setText("<html><b>Version: " + server.getVersion().id + "</b></html>");
-            serverVersionLabel.setVerticalAlignment(SwingConstants.TOP);
-            serverVersionLabel.setBorder(new EmptyBorder(0, 10, 0, 0));
-            panel.add(serverVersionLabel);
 
             JLabel startServerLabel = new JLabel();
             startServerLabel.setVerticalAlignment(SwingConstants.TOP);
@@ -107,13 +101,51 @@ public class GuiMainView {
                 e.printStackTrace();
             }
 
+            JLabel editServerLabel = new JLabel();
+            editServerLabel.setVerticalAlignment(SwingConstants.TOP);
+            try {
+                editServerLabel.setIcon(GeneralUtils.getScaledImage(new ImageIcon(
+                        ImageIO.read(new File(Constants.DATA_DIRECTORY + Constants.IMG_DIRECTORY + "edit_server.png"))), 16, 16));
+                editServerLabel.setBorder(new EmptyBorder(0, 5, 0, 0));
+                editServerLabel.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        editServer(server);
+                    }
+                });
+                panel.add(editServerLabel);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            JLabel deleteServerLabel = new JLabel();
+            deleteServerLabel.setVerticalAlignment(SwingConstants.TOP);
+            try {
+                deleteServerLabel.setIcon(GeneralUtils.getScaledImage(new ImageIcon(
+                        ImageIO.read(new File(Constants.DATA_DIRECTORY + Constants.IMG_DIRECTORY + "delete_server.png"))), 16, 16));
+                deleteServerLabel.setBorder(new EmptyBorder(0, 5, 0, 0));
+                deleteServerLabel.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        deleteServer(server);
+                    }
+                });
+                panel.add(deleteServerLabel);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            JLabel serverVersionLabel = new JLabel();
+            serverVersionLabel.setText("<html><b>Version: " + server.getVersion().id + "</b></html>");
+            serverVersionLabel.setVerticalAlignment(SwingConstants.TOP);
+            serverVersionLabel.setBorder(new EmptyBorder(0, 10, 0, 0));
+            panel.add(serverVersionLabel);
+
             serverListPanel.add(panel);
             serverListPanel.revalidate();
+            mainPanel.revalidate();
+            mainPanel.repaint();
         }
-    }
-
-    private void createNewServer() {
-
     }
 
     public JPanel getMainPanel() {
@@ -127,6 +159,7 @@ public class GuiMainView {
             e.printStackTrace();
             Popup.error(Constants.PROJECT_TITLE, "Unable to run server " + server.getName() + ": " + e.getMessage());
         }
+        updateView();
     }
 
     public void backupServer(Server server) {
@@ -137,6 +170,23 @@ public class GuiMainView {
             e.printStackTrace();
             Popup.error(Constants.PROJECT_TITLE, "Unable to backup server " + server.getName() + ": " + e.getMessage());
         }
+        updateView();
+    }
+
+    private void createNewServer() {
+        int onlyReleases = Popup.selectButton(Constants.PROJECT_TITLE, "Should non-full releases also be listed?", new String[]{"Yes", "No"});
+        serverManager.createServer(onlyReleases == 1);
+        updateView();
+    }
+
+    private void deleteServer(Server server) {
+        serverManager.deleteServer(server);
+        updateView();
+    }
+
+    private void editServer(Server server) {
+        GuiEditServer.newInstance(server);
+        updateView();
     }
 
     public static void main(String[] args) {

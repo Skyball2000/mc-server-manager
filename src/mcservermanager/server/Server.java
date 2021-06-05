@@ -82,6 +82,8 @@ public class Server {
                     } else if (eulaText.get(i).equals("eula=true")) return true;
                 }
             } else {
+                if (new File(directory, "ops.txt").exists()) return true;
+                if (new File(directory, "ops.json").exists()) return true;
                 run();
                 for (int i = 0; i < 4; i++) {
                     Sleep.seconds(4);
@@ -122,12 +124,48 @@ public class Server {
         }
     }
 
+    public void setIcon() {
+        java.io.File[] files = FileUtils.windowsFilePicker();
+        if (files != null && files.length > 0) {
+            File from = new File(files[0].getAbsolutePath());
+            try {
+                FileUtils.copyFile(from, new File(directory, "world/icon.png"));
+            } catch (IOException e) {
+                Popup.error(Constants.PROJECT_TITLE, "Unable to copy file: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void setVersion() {
+
+    }
+
+    public void setName() {
+
+    }
+
+    public File getDirectory() {
+        return directory;
+    }
+
     public boolean isValid() {
-        return isValid;
+        return isValid && serverFile != null && serverFile.exists() && directory != null && directory.exists();
     }
 
     public void run() throws IOException {
         Log.info("Running server {} {}", version.id, getName());
         FileUtils.openJar(serverFile.getAbsolutePath(), directory.getAbsolutePath(), new String[]{});
+    }
+
+    @Override
+    public String toString() {
+        return "Server{" +
+               "directory=" + directory +
+               ", serverFile=" + serverFile +
+               ", version=" + version +
+               ", isValid=" + isValid +
+               ", eulaAccepted=" + eulaAccepted +
+               '}';
     }
 }

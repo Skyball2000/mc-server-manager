@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 public class ServerManager {
     private final VersionManager versionManager;
-    private final ArrayList<Server> servers = new ArrayList<>();
+    private List<Server> servers = new ArrayList<>();
 
     public ServerManager(VersionManager versionManager) {
         this.versionManager = versionManager;
@@ -38,7 +38,11 @@ public class ServerManager {
             }
     }
 
-    public void createServer(String version) {
+    public void createServer(boolean onlyReleases) {
+        String version = Popup.dropDown(Constants.PROJECT_TITLE, "Select the server version from the drop down below:",
+                versionManager.getVersions().stream().filter(ver -> !onlyReleases || ver.type == Version.Type.RELEASE)
+                        .map(ver -> ver.id).collect(Collectors.toList()).toArray(new String[]{}));
+        if (version == null || version.length() == 0) return;
         Version serverVersion = versionManager.getVersionByIdentifier(version);
         if (serverVersion != null) {
             String name = Popup.input(Constants.PROJECT_TITLE, "Enter a name for the server:", "");
@@ -56,7 +60,24 @@ public class ServerManager {
         } else Popup.error(Constants.PROJECT_TITLE, "Unknown version " + version);
     }
 
-    public ArrayList<Server> getServers() {
+    public void deleteServer(Server server) {
+        String confirmation = Popup.input(Constants.PROJECT_TITLE,
+                "Are you sure you want to delete the server '" + server.getName() + "'?\n" +
+                "This cannot be undone! Type 'delete forever' to confirm:", "");
+        if (confirmation == null || !confirmation.equals("delete forever")) return;
+        Log.info("Deleting server {}", server.getName());
+        server.getDirectory().deleteDirectory();
+        if (!server.getDirectory().exists()) {
+            Log.info("Deleted server {}", server.getName());
+            Popup.message(Constants.PROJECT_TITLE, "Deleted Server '" + server.getName() + "'");
+            servers.remove(server);
+            return;
+        }
+        Popup.message(Constants.PROJECT_TITLE, "Unable to delete the server '" + server.getName() + "'.\nMake sure the server is not running.");
+    }
+
+    public List<Server> getServers() {
+        servers = servers.stream().filter(Server::isValid).collect(Collectors.toList());
         return servers;
     }
 

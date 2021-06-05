@@ -38,12 +38,8 @@ public class ServerManager {
             }
     }
 
-    public void createServer(boolean onlyReleases) {
-        String version = Popup.dropDown(Constants.PROJECT_TITLE, "Select the server version from the drop down below:",
-                versionManager.getVersions().stream().filter(ver -> !onlyReleases || ver.type == Version.Type.RELEASE)
-                        .map(ver -> ver.id).collect(Collectors.toList()).toArray(new String[]{}));
-        if (version == null || version.length() == 0) return;
-        Version serverVersion = versionManager.getVersionByIdentifier(version);
+    public void createServer() {
+        Version serverVersion = pickVersion();
         if (serverVersion != null) {
             String name = Popup.input(Constants.PROJECT_TITLE, "Enter a name for the server:", "");
             if (name != null && name.length() > 0 && name.matches("^[^\\\\/:*?\"<>|]+$")) {
@@ -57,7 +53,7 @@ public class ServerManager {
                 if (server != null && server.isValid())
                     servers.add(server);
             } else Popup.error(Constants.PROJECT_TITLE, "Invalid server name.");
-        } else Popup.error(Constants.PROJECT_TITLE, "Unknown version " + version);
+        }
     }
 
     public void deleteServer(Server server) {
@@ -74,6 +70,22 @@ public class ServerManager {
             return;
         }
         Popup.message(Constants.PROJECT_TITLE, "Unable to delete the server '" + server.getName() + "'.\nMake sure the server is not running.");
+    }
+
+    public void setServerVersion(Server server) {
+        Version serverVersion = pickVersion();
+        if (serverVersion != null) {
+            server.setVersion(serverVersion);
+        }
+    }
+
+    private Version pickVersion() {
+        boolean onlyRelease = 1 == Popup.selectButton(Constants.PROJECT_TITLE, "Should non-full releases also be listed?", new String[]{"Yes", "No"});
+        String version = Popup.dropDown(Constants.PROJECT_TITLE, "Select the server version from the drop down below:",
+                versionManager.getVersions().stream().filter(ver -> !onlyRelease || ver.type == Version.Type.RELEASE)
+                        .map(ver -> ver.id).collect(Collectors.toList()).toArray(new String[]{}));
+        if (version == null || version.length() == 0) return null;
+        return versionManager.getVersionByIdentifier(version);
     }
 
     public List<Server> getServers() {

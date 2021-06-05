@@ -11,5 +11,6 @@
     <orderEntry type="library" name="yw-utils-log" level="project" />
     <orderEntry type="library" name="json" level="project" />
     <orderEntry type="library" name="yw-utils-general" level="project" />
+    <orderEntry type="library" name="yw-utils-types" level="project" />
   </component>
 </module>

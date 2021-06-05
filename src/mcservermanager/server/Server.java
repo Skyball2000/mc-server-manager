@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Server {
-    private final File directory;
+    private File directory;
     private File serverFile;
     private Version version;
     private boolean isValid = false;
@@ -129,7 +129,9 @@ public class Server {
         if (files != null && files.length > 0) {
             File from = new File(files[0].getAbsolutePath());
             try {
-                FileUtils.copyFile(from, new File(directory, "world/icon.png"));
+                File dest = new File(directory, "world/icon.png");
+                dest.getParentFile().mkdirs();
+                FileUtils.copyFile(from, dest);
             } catch (IOException e) {
                 Popup.error(Constants.PROJECT_TITLE, "Unable to copy file: " + e.getMessage());
                 e.printStackTrace();
@@ -137,16 +139,60 @@ public class Server {
         }
     }
 
-    public void setVersion() {
-
+    public void setVersion(Version version) {
+        this.version = version;
+        if (!serverFile.delete()) {
+            Popup.error(Constants.PROJECT_TITLE, "Unable to delete old version!\nMake sure the server " + getName() + " is not running.");
+            return;
+        }
+        serverFile = new File(directory, version.id + ".jar");
+        if (!serverFile.exists()) {
+            try {
+                version.getServer().copyFile(serverFile);
+            } catch (IOException e) {
+                e.printStackTrace();
+                Popup.error(Constants.PROJECT_TITLE, "Unable to copy file to " + serverFile);
+            }
+        }
     }
 
     public void setName() {
+        String name = Popup.input(Constants.PROJECT_TITLE, "Enter a name for the server:", "");
+        if (name != null && name.length() > 0 && name.matches("^[^\\\\/:*?\"<>|]+$")) {
+            File newDirectory = new File(directory.getParentFile(), name);
+            if (!directory.renameTo(newDirectory))
+                Popup.message(Constants.PROJECT_TITLE, "Unable to rename server.\nMake sure the server " +
+                                                       getName() + " is not running.");
+            else {
+                directory = newDirectory;
+                serverFile = new File(directory, version.id + ".jar");
+                Log.info("Renamed server to {}", getName());
+            }
+        }
+    }
 
+    public void openProperties() {
+        try {
+            new File(directory, "server.properties").open();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void openDatapacks() {
+        try {
+            new File(directory, "world/datapacks").open();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public File getDirectory() {
         return directory;
+    }
+
+    public File getServerFile() {
+        return serverFile;
     }
 
     public boolean isValid() {
@@ -154,7 +200,7 @@ public class Server {
     }
 
     public void run() throws IOException {
-        Log.info("Running server {} {}", version.id, getName());
+        Log.info("Running server {} with version {}", getName(), version.id);
         FileUtils.openJar(serverFile.getAbsolutePath(), directory.getAbsolutePath(), new String[]{});
     }
 

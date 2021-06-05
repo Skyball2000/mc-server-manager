@@ -1,0 +1,13 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="mc-server-manager:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/mc_server_manager_jar</output-path>
+    <root id="archive" name="mc-server-manager.jar">
+      <element id="module-output" name="mc-server-manager" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/json.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/yw-utils-types.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/yw-utils-log.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/yw-utils-general.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/yw-utils-file.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

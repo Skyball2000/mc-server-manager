@@ -72,7 +72,7 @@ public class GuiMainView {
             try {
                 startServerLabel.setIcon(GeneralUtils.getScaledImage(new ImageIcon(
                         ImageIO.read(new File(Constants.DATA_DIRECTORY + Constants.IMG_DIRECTORY + "start_server.png"))), 16, 16));
-                startServerLabel.setBorder(new EmptyBorder(0, 20, 0, 0));
+                startServerLabel.setBorder(new EmptyBorder(0, 10, 0, 0));
                 startServerLabel.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
@@ -174,8 +174,7 @@ public class GuiMainView {
     }
 
     private void createNewServer() {
-        int onlyReleases = Popup.selectButton(Constants.PROJECT_TITLE, "Should non-full releases also be listed?", new String[]{"Yes", "No"});
-        serverManager.createServer(onlyReleases == 1);
+        serverManager.createServer();
         updateView();
     }
 
@@ -185,7 +184,7 @@ public class GuiMainView {
     }
 
     private void editServer(Server server) {
-        GuiEditServer.newInstance(server);
+        GuiEditServer.newInstance(server, serverManager);
         updateView();
     }
 

@@ -1,6 +1,7 @@
 package mcservermanager.gui;
 
 import mcservermanager.server.Server;
+import mcservermanager.server.ServerManager;
 import mcservermanager.util.Constants;
 
 import javax.swing.*;
@@ -12,8 +13,10 @@ public class GuiEditServer extends JDialog {
     private JButton setServerIcon;
     private JButton setServerVersionButton;
     private JButton setServerNameButton;
+    private JButton openDatapackFolderButton;
+    private JButton editPropertiesButton;
 
-    public GuiEditServer(Server server) {
+    public GuiEditServer(Server server, ServerManager serverManager) {
         setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
@@ -32,8 +35,10 @@ public class GuiEditServer extends JDialog {
         contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
         setServerIcon.addActionListener(e -> server.setIcon());
-        setServerVersionButton.addActionListener(e -> server.setVersion());
+        setServerVersionButton.addActionListener(e -> serverManager.setServerVersion(server));
         setServerNameButton.addActionListener(e -> server.setName());
+        editPropertiesButton.addActionListener(e -> server.openProperties());
+        openDatapackFolderButton.addActionListener(e -> server.openDatapacks());
     }
 
     private void onOK() {
@@ -44,10 +49,11 @@ public class GuiEditServer extends JDialog {
         dispose();
     }
 
-    public static void newInstance(Server server) {
-        GuiEditServer dialog = new GuiEditServer(server);
-        dialog.pack();
+    public static void newInstance(Server server, ServerManager serverManager) {
+        GuiEditServer dialog = new GuiEditServer(server, serverManager);
+        dialog.setIconImage(new ImageIcon(Constants.DATA_DIRECTORY + Constants.IMG_DIRECTORY + "icon.png").getImage());
         dialog.setTitle(Constants.PROJECT_TITLE);
+        dialog.pack();
         dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
     }

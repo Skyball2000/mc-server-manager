@@ -1,10 +1,12 @@
 package mcservermanager.version;
 
+import mcservermanager.Main;
 import mcservermanager.util.Constants;
 import mcservermanager.util.URLGet;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import yanwittmann.log.Log;
+import yanwittmann.types.Configuration;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,7 +24,10 @@ public class VersionManager {
     }
 
     private boolean init() throws IOException {
-        ArrayList<String> versionMaifest = URLGet.getFromUrl(Constants.VERSION_MANIFEST_URL, false);
+        Configuration config = Main.getConfiguration();
+        long lastUpdatedTime = Long.parseLong(config.getOrDefault("lastVersionManifestUpdateTime", "0"));
+        config.set("lastVersionManifestUpdateTime", System.currentTimeMillis());
+        ArrayList<String> versionMaifest = URLGet.getFromUrl(Constants.VERSION_MANIFEST_URL, lastUpdatedTime + 43200000 < System.currentTimeMillis());
         if (versionMaifest == null) return false;
         JSONObject jsonRoot = new JSONObject(String.join("", versionMaifest));
 

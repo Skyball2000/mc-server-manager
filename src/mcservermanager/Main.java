@@ -1,11 +1,12 @@
 package mcservermanager;
 
-import mcservermanager.util.URLGet;
+import mcservermanager.version.VersionManager;
 
 import java.io.IOException;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        URLGet.getFromUrl("https://launchermeta.mojang.com/mc/game/version_manifest.json");
+        VersionManager versionManager = new VersionManager();
+        versionManager.getVersionByIdentifier("1.16.5").getMetaData();
     }
 }

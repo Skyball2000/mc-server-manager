@@ -1,2 +1,2 @@
-# mc-server-manager
-A Server Manager for Minecraft
+# Minecraft Server Manager
+A simple Server Manager for Minecraft

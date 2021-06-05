@@ -3,6 +3,7 @@ package mcservermanager;
 import mcservermanager.gui.GuiMainView;
 import mcservermanager.server.ServerManager;
 import mcservermanager.util.Constants;
+import mcservermanager.util.URLGet;
 import mcservermanager.version.VersionManager;
 import yanwittmann.types.Configuration;
 

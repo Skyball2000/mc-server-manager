@@ -3,6 +3,7 @@ package mcservermanager.gui;
 import mcservermanager.server.Server;
 import mcservermanager.server.ServerManager;
 import mcservermanager.util.Constants;
+import mcservermanager.util.URLGet;
 import yanwittmann.log.Log;
 import yanwittmann.utils.GeneralUtils;
 import yanwittmann.utils.Popup;
@@ -27,11 +28,19 @@ public class GuiMainView {
     private JPanel serverListPanel;
     private JButton createNewServerButton;
     private JButton reloadButton;
+    private JLabel yourIpLabel;
 
     public GuiMainView(ServerManager serverManager) {
         this.serverManager = serverManager;
         createNewServerButton.addActionListener(e -> createNewServer());
         reloadButton.addActionListener(e -> updateView());
+        yourIpLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                GeneralUtils.copyString(yourIpLabel.getText().replaceAll("(.+) {2}.+", "$1"));
+            }
+        });
+        new Thread(() -> yourIpLabel.setText(URLGet.detectIP() + "  (click to copy)")).start();
     }
 
     public void updateView() {

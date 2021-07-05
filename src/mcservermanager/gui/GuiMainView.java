@@ -190,8 +190,8 @@ public class GuiMainView {
     }
 
     private void createNewServer() {
-        //serverManager.createServer();
-        //updateView();
+        serverManager.createServer();
+        updateView();
         String additionalText = "";
         try {
             additionalText = "\nWith this, a total of " + String.join("", FileUtils.getResponseFromURL("http://yanwittmann.de/projects/countapi/hit.php?key=serversCreated&namespace=mcservermanager"))

@@ -13,8 +13,8 @@ import yanwittmann.utils.Sleep;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Server {
@@ -79,6 +79,8 @@ public class Server {
                             Log.info("Accepting eula terms...");
                             eulaText.set(i, "eula=true");
                             eula.write(eulaText);
+                            setMinecraftProperty("\\u00a77Created using the\\u00a7r\\n\\u00a79github.com\\/Skyball2000\\/mc-server-manager", "motd");
+                            setIcon(new File("data/img/icon_small.png"));
                             return true;
                         } else return false;
                     } else if (eulaText.get(i).equals("eula=true")) return true;
@@ -142,6 +144,17 @@ public class Server {
         }
     }
 
+    public void setIcon(File file) {
+        if (file == null || !file.exists()) return;
+        try {
+            File dest = new File(directory, "world/icon.png");
+            dest.getParentFile().mkdirs();
+            FileUtils.copyFile(file, dest);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void setVersion(Version version) {
         this.version = version;
         if (!serverFile.delete()) {
@@ -183,6 +196,34 @@ public class Server {
             String max = Popup.dropDown(Constants.PROJECT_TITLE, "Select the maximum java memory", Constants.JAVA_VM_RAM_OPTIONS, "2048M");
             if (max == null || max.length() == 0) return;
             setConfigValue("-Xmx", max);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void quickEditProperties() {
+        String propertyName = Popup.dropDown(Constants.PROJECT_TITLE, "What property do you want to edit?", Constants.QUICK_PROPERTIES[1]);
+        if (propertyName == null || propertyName.length() == 0) return;
+        int index = Arrays.asList(Constants.QUICK_PROPERTIES[1]).indexOf(propertyName);
+        String identifier = Constants.QUICK_PROPERTIES[0][index];
+        String defaultValue = Constants.QUICK_PROPERTIES[2][index];
+        String value = Popup.input(Constants.PROJECT_TITLE, "Value to set:", defaultValue);
+        if (value == null || value.length() == 0) return;
+        setMinecraftProperty(value, identifier.split("&&"));
+    }
+
+    public void setMinecraftProperty(String value, String... setProperties) {
+        try {
+            File propertiesFile = new File(directory, "server.properties");
+            ArrayList<String> properties = propertiesFile.readToArrayList();
+            for (int i = 0; i < properties.size(); i++) {
+                String prop = properties.get(i).replaceAll("(.+)=.+", "$1");
+                for (String setProperty : setProperties) {
+                    if (setProperty.equals(prop))
+                        properties.set(i, prop + "=" + value);
+                }
+            }
+            propertiesFile.write(properties);
         } catch (IOException e) {
             e.printStackTrace();
         }

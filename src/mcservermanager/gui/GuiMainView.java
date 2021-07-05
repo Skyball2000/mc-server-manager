@@ -4,7 +4,7 @@ import mcservermanager.server.Server;
 import mcservermanager.server.ServerManager;
 import mcservermanager.util.Constants;
 import mcservermanager.util.URLGet;
-import yanwittmann.log.Log;
+import yanwittmann.file.FileUtils;
 import yanwittmann.utils.GeneralUtils;
 import yanwittmann.utils.Popup;
 
@@ -13,8 +13,6 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -29,6 +27,7 @@ public class GuiMainView {
     private JButton createNewServerButton;
     private JButton reloadButton;
     private JLabel yourIpLabel;
+    private JLabel yourLocalIpLabel;
 
     public GuiMainView(ServerManager serverManager) {
         this.serverManager = serverManager;
@@ -41,6 +40,14 @@ public class GuiMainView {
             }
         });
         new Thread(() -> yourIpLabel.setText(URLGet.detectIP() + "  (click to copy)")).start();
+        yourLocalIpLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                GeneralUtils.copyString(yourLocalIpLabel.getText().replaceAll("(.+) {2}.+", "$1"));
+            }
+        });
+        new Thread(() -> yourLocalIpLabel.setText(URLGet.detectLocalIp() + "  (click to copy)")).start();
+        fixScrolling(serverList);
     }
 
     public void updateView() {
@@ -183,8 +190,16 @@ public class GuiMainView {
     }
 
     private void createNewServer() {
-        serverManager.createServer();
-        updateView();
+        //serverManager.createServer();
+        //updateView();
+        String additionalText = "";
+        try {
+            additionalText = "\nWith this, a total of " + String.join("", FileUtils.getResponseFromURL("http://yanwittmann.de/projects/countapi/hit.php?key=serversCreated&namespace=mcservermanager"))
+                             + " servers have been created using this tool!";
+        } catch (IOException | ArrayIndexOutOfBoundsException e) {
+            e.printStackTrace();
+        }
+        Popup.message(Constants.PROJECT_TITLE, "Thank you for using the MC Server Manager!" + additionalText);
     }
 
     private void deleteServer(Server server) {
@@ -195,6 +210,21 @@ public class GuiMainView {
     private void editServer(Server server) {
         GuiEditServer.newInstance(server, serverManager);
         updateView();
+    }
+
+    public static void fixScrolling(JScrollPane jScrollPane) {
+        JLabel systemLabel = new JLabel();
+        FontMetrics metrics = systemLabel.getFontMetrics(systemLabel.getFont());
+        int lineHeight = metrics.getHeight();
+        int charWidth = metrics.getMaxAdvance();
+
+        JScrollBar systemVBar = new JScrollBar(JScrollBar.VERTICAL);
+        JScrollBar systemHBar = new JScrollBar(JScrollBar.HORIZONTAL);
+        int verticalIncrement = systemVBar.getUnitIncrement();
+        int horizontalIncrement = systemHBar.getUnitIncrement();
+
+        jScrollPane.getVerticalScrollBar().setUnitIncrement(lineHeight * verticalIncrement);
+        jScrollPane.getHorizontalScrollBar().setUnitIncrement(charWidth * horizontalIncrement);
     }
 
     public static void main(String[] args) {

@@ -6,12 +6,14 @@ import mcservermanager.version.VersionManager;
 import yanwittmann.file.File;
 import yanwittmann.file.FileUtils;
 import yanwittmann.log.Log;
+import yanwittmann.types.Configuration;
 import yanwittmann.utils.Popup;
 import yanwittmann.utils.Sleep;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -90,7 +92,8 @@ public class Server {
                     if (eula.exists()) break;
                 }
                 if (!eula.exists()) {
-                    Popup.error(Constants.PROJECT_TITLE, "Unable to accept eula for " + getName());
+                    Popup.error(Constants.PROJECT_TITLE, "Unable to accept eula for " + getName() +
+                                                         "\nMake sure that you use the latest java version!");
                     return false;
                 }
                 return acceptEula();
@@ -171,6 +174,20 @@ public class Server {
         }
     }
 
+    public void setJavaMemory() {
+        try {
+            initializeConfig();
+            String min = Popup.dropDown(Constants.PROJECT_TITLE, "Select the minimum java memory", Constants.JAVA_VM_RAM_OPTIONS, "1024M");
+            if (min == null || min.length() == 0) return;
+            setConfigValue("-Xms", min);
+            String max = Popup.dropDown(Constants.PROJECT_TITLE, "Select the maximum java memory", Constants.JAVA_VM_RAM_OPTIONS, "2048M");
+            if (max == null || max.length() == 0) return;
+            setConfigValue("-Xmx", max);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void openProperties() {
         try {
             new File(directory, "server.properties").open();
@@ -187,6 +204,36 @@ public class Server {
         }
     }
 
+    private Configuration configuration = null;
+
+    private String getConfigValue(String key, String defaultValue) {
+        try {
+            initializeConfig();
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.error("Unable to create configuration file inside server directory: {}", directory.getAbsolutePath());
+            return defaultValue;
+        }
+        return configuration.getOrDefault(key, defaultValue);
+    }
+
+    private void setConfigValue(String key, String value) {
+        try {
+            initializeConfig();
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.error("Unable to create configuration file inside server directory: {}", directory.getAbsolutePath());
+            return;
+        }
+        configuration.set(key, value);
+    }
+
+    private Configuration initializeConfig() throws IOException {
+        if (configuration != null) return configuration;
+        configuration = new Configuration(new File(directory, "mc-server-manager.cfg"));
+        return configuration;
+    }
+
     public File getDirectory() {
         return directory;
     }
@@ -201,7 +248,12 @@ public class Server {
 
     public void run() throws IOException {
         Log.info("Running server {} with version {}", getName(), version.id);
-        FileUtils.openJar(serverFile.getAbsolutePath(), directory.getAbsolutePath(), new String[]{});
+
+        String volume = directory.getAbsolutePath().replaceAll("([a-zA-Z]:).+", "$1");
+        String startServerCommand = "java -Xms" + getConfigValue("-Xms", "1024M") + " -Xmx" + getConfigValue("-Xmx", "2048M") + " -jar " + serverFile.getName();
+        String command = "cmd /c \"cd " + directory.getAbsolutePath() + " && " + volume + " && " + startServerCommand + "\"";
+        System.out.println("Executing CMD command: " + command);
+        Runtime.getRuntime().exec(command, null, directory);
     }
 
     @Override

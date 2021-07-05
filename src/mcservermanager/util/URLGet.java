@@ -6,8 +6,7 @@ import yanwittmann.log.Log;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.*;
 import java.util.ArrayList;
 
 public class URLGet {
@@ -29,7 +28,7 @@ public class URLGet {
     }
 
     public static String detectIP() {
-        URL whatismyip = null;
+        URL whatismyip;
         try {
             whatismyip = new URL("http://checkip.amazonaws.com");
         } catch (MalformedURLException e) {
@@ -44,12 +43,22 @@ public class URLGet {
             e.printStackTrace();
         }
 
-        String ip = null; //you get the IP as a String
+        String ip = null;
         try {
             ip = in.readLine();
         } catch (IOException e) {
             e.printStackTrace();
         }
         return ip;
+    }
+
+    public static String detectLocalIp() {
+        try(final DatagramSocket socket = new DatagramSocket()){
+            socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
+            return socket.getLocalAddress().getHostAddress();
+        } catch (UnknownHostException | SocketException e) {
+            e.printStackTrace();
+        }
+        return "";
     }
 }

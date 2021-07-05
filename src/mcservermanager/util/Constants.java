@@ -18,4 +18,6 @@ public class Constants {
 
     public final static String PROJECT_TITLE = "Minecraft Server Manager";
 
+    public final static String[] JAVA_VM_RAM_OPTIONS = new String[]{"64M", "128M", "256M", "512M", "1024M", "2048M", "4096M", "8192M", "10000M", "12288M", "16384M"};
+
 }

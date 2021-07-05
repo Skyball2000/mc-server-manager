@@ -5,6 +5,7 @@ import mcservermanager.server.ServerManager;
 import mcservermanager.util.Constants;
 import mcservermanager.util.URLGet;
 import mcservermanager.version.VersionManager;
+import yanwittmann.file.FileUtils;
 import yanwittmann.types.Configuration;
 
 import javax.swing.*;
@@ -13,6 +14,7 @@ import java.awt.event.WindowEvent;
 import java.io.IOException;
 
 public class Main {
+
     public static void main(String[] args) {
         new Main();
     }

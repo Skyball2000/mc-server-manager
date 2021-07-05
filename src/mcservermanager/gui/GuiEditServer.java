@@ -15,6 +15,7 @@ public class GuiEditServer extends JDialog {
     private JButton setServerNameButton;
     private JButton openDatapackFolderButton;
     private JButton editPropertiesButton;
+    private JButton setJavaMemoryButton;
 
     public GuiEditServer(Server server, ServerManager serverManager) {
         setContentPane(contentPane);
@@ -39,6 +40,7 @@ public class GuiEditServer extends JDialog {
         setServerNameButton.addActionListener(e -> server.setName());
         editPropertiesButton.addActionListener(e -> server.openProperties());
         openDatapackFolderButton.addActionListener(e -> server.openDatapacks());
+        setJavaMemoryButton.addActionListener(e -> server.setJavaMemory());
     }
 
     private void onOK() {

@@ -190,16 +190,17 @@ public class GuiMainView {
     }
 
     private void createNewServer() {
-        serverManager.createServer();
-        updateView();
-        String additionalText = "";
-        try {
-            additionalText = "\nWith this, a total of " + String.join("", FileUtils.getResponseFromURL("http://yanwittmann.de/projects/countapi/hit.php?key=serversCreated&namespace=mcservermanager"))
-                             + " servers have been created using this tool!";
-        } catch (IOException | ArrayIndexOutOfBoundsException e) {
-            e.printStackTrace();
+        if (serverManager.createServer()) {
+            updateView();
+            String additionalText = "";
+            try {
+                additionalText = "\nWith this, a total of " + String.join("", FileUtils.getResponseFromURL("http://yanwittmann.de/projects/countapi/hit.php?key=serversCreated&namespace=mcservermanager"))
+                                 + " servers have been created using this tool!";
+            } catch (IOException | ArrayIndexOutOfBoundsException e) {
+                e.printStackTrace();
+            }
+            Popup.message(Constants.PROJECT_TITLE, "Thank you for using the MC Server Manager!" + additionalText);
         }
-        Popup.message(Constants.PROJECT_TITLE, "Thank you for using the MC Server Manager!" + additionalText);
     }
 
     private void deleteServer(Server server) {

@@ -293,6 +293,7 @@ public class Server {
         String volume = directory.getAbsolutePath().replaceAll("([a-zA-Z]:).+", "$1");
         String startServerCommand = "java -Xms" + getConfigValue("-Xms", "1024M") + " -Xmx" + getConfigValue("-Xmx", "2048M") + " -jar " + serverFile.getName();
         String command = "cmd /c \"cd " + directory.getAbsolutePath() + " && " + volume + " && " + startServerCommand + "\"";
+
         System.out.println("Executing CMD command: " + command);
         Runtime.getRuntime().exec(command, null, directory);
     }

@@ -38,10 +38,12 @@ public class ServerManager {
             }
     }
 
-    public void createServer() {
+    public boolean createServer() {
         Version serverVersion = pickVersion();
         if (serverVersion != null) {
-            String name = Popup.input(Constants.PROJECT_TITLE, "Enter a name for the server:", "");
+            String name = Popup.input(Constants.PROJECT_TITLE, "Please keep in mind that the server creation process will take up to a minute.\n" +
+                                                               "Please do not interact with the application while the server is being created.\n" +
+                                                               "Enter a name for the server:", "");
             if (name != null && name.length() > 0 && name.matches("^[^\\\\/:*?\"<>|]+$")) {
                 Server server = null;
                 try {
@@ -50,10 +52,13 @@ public class ServerManager {
                     e.printStackTrace();
                     Popup.error(Constants.PROJECT_TITLE, "Unable to create server:\n" + e.getMessage());
                 }
-                if (server != null && server.isValid())
+                if (server != null && server.isValid()) {
                     servers.add(server);
+                    return true;
+                }
             } else Popup.error(Constants.PROJECT_TITLE, "Invalid server name.");
         }
+        return false;
     }
 
     public void deleteServer(Server server) {
